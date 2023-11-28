@@ -6,7 +6,7 @@
         v-model="formState.account"
         class="h40"
         name="account"
-        placeholder="邮箱/手机"
+        placeholder="请输入账号"
         :clearable="true"
         tabindex="1"
         type="text"
@@ -32,12 +32,12 @@
       />
     </el-form-item>
 
-    <el-form-item v-if="showCaptcha" prop="captcha">
+    <el-form-item v-if="showCaptcha" prop="verifyCode">
       <div style="position: relative">
         <div class="code-inp">
           <el-input
             ref="captcha"
-            v-model="formState.captcha"
+            v-model="formState.verifyCode"
             class="h40"
             type="text"
             name="captcha"
@@ -64,10 +64,10 @@
         style="width: 100%"
         @click.prevent="loginHandle"
       >
-        快速登录
+        登录
       </el-button>
 
-      <el-link
+      <!-- <el-link
         type="primary"
         :underline="false"
         :loading="loading"
@@ -76,14 +76,14 @@
         @click.prevent="freeLogin"
       >
         免登录
-      </el-link>
+      </el-link> -->
     </el-form-item>
   </el-form>
 </template>
 
 <script setup>
 import { ref, onBeforeMount, reactive, computed } from 'vue'
-import { login } from '@/api/user'
+import { login, getCaptcha } from '@/api/user'
 import { useUserStore } from '@/store'
 import { useRouter, useRoute } from 'vue-router'
 
@@ -95,25 +95,26 @@ const ruleForm = ref()
 const trigger = ['blur', 'change']
 const formState = reactive( {
   country : '86',
-  captcha : '',
-  account : 'admin',
+  verifyCode : '',
+  verifyCodeKey : '',
+  username : 'admin',
   password : 'admin9527'
 } )
 const rules = {
   account : [{ required : true, message : '请输入手机或邮箱账号', trigger }],
   password : [{ required : true, message : '请输入密码', trigger }],
-  captcha : [{ required : true, message : '请输入校验码', trigger }]
+  verifyCode : [{ required : true, message : '请输入校验码', trigger }]
 }
 const bindToken = ref( '' )
-const showCaptcha = ref( false )
+const showCaptcha = ref( true )
 const captchaImg = ref( '' )
 const captchaId = ref( '' )
 const loading = ref( false )
 
 const disabledLogin = computed( () => {
-  const { captcha, account, password } = formState
+  const { verifyCode, account, password } = formState
   if ( showCaptcha.value ) {
-    return !captcha || !account || !password
+    return !verifyCode || !account || !password
   } else {
     return !account || !password
   }
@@ -121,6 +122,7 @@ const disabledLogin = computed( () => {
 
 onBeforeMount( () => {
   getQueryParams()
+  updateImage()
 } )
 
 function getQueryParams() {
@@ -131,47 +133,61 @@ function getQueryParams() {
 
 // 图片验证码
 async function updateImage() {
-  // try {
-  //   const { code, data } = await request.getCaptcha()
-  //   if ( code == 200 ) {
-  //     const { captchaId, bs64 } = data
-  //     captchaImg.value = bs64
-  //     captchaId.value = captchaId
-  //   }
-  // } catch ( e ) {
-  //   captchaImg.value = ''
-  //   captchaId.value = ''
-  // }
-}
-
-async function freeLogin() {
-  loading.value = true
   try {
-    const token = 'token'
-    userStore.SET_TOKEN( token )
-    router.push( '/' )
+    const { data } = await getCaptcha()
+    console.log( 'data', data )
+    const { verifyCodeBase64, verifyCodeKey } = data
+    captchaImg.value = verifyCodeBase64
+    // captchaId.value = verifyCodeKey
+    formState.verifyCodeKey = verifyCodeKey
+    // if ( code == 200 ) {
+    //   const { captchaId, bs64 } = data
+    //   captchaImg.value = bs64
+    //   captchaId.value = captchaId
+    // }
   } catch ( e ) {
-  } finally {
-    loading.value = false
+    console.error( e )
+    captchaImg.value = ''
+    captchaId.value = ''
   }
 }
+
+// async function freeLogin() {
+//   loading.value = true
+//   try {
+//     const token = 'token'
+//     userStore.SET_TOKEN( token )
+//     router.push( '/' )
+//   } catch ( e ) {
+//   } finally {
+//     loading.value = false
+//   }
+// }
 
 function loginHandle() {
   loading.value = true
   ruleForm.value.validate( async valid => {
     if ( valid ) {
       try {
+        // const params = {
+        //   username : formState.account,
+        //   password : formState.password
+        // }
         const params = {
-          username : formState.account,
-          password : formState.password
+          username : formState.username,
+          password : formState.password,
+          verifyCode : formState.verifyCode,
+          verifyCodeKey : formState.verifyCodeKey
         }
-        if ( showCaptcha.value ) {
-          params.captchaId = captchaId.value
-          params.captchaValue = formState.captcha
-        }
-        const { data } = await login( { params } )
-        const { token } = data
-        userStore.SET_TOKEN( token )
+        console.log( 'params', params )
+        // if ( showCaptcha.value ) {
+        //   params.captchaId = captchaId.value
+        //   params.captchaValue = formState.verifyCode
+        // }
+        const { data } = await login( params )
+        console.log( 'loginHandle', data )
+        const { access } = data
+        userStore.SET_TOKEN( access )
         router.push( '/' )
       } catch ( e ) {
       } finally {

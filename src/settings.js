@@ -1,5 +1,5 @@
 const defaultSetting = {
-  title : 'Vite Element Admin',
+  title : 'Vue3 Django Admin',
   showSettings : true,
   tagsView : true,
   fixedHeader : true,

@@ -11,8 +11,16 @@ export function UserList( data ) {
 
 export function login( data ) {
   return http.request( {
+    method : 'post',
+    url : '/v1/oauth/login/',
+    data
+  } )
+}
+
+export function getCaptcha( data ) {
+  return http.request( {
     method : 'get',
-    url : '/login',
+    url : '/v1/oauth/captcha/',
     data
   } )
 }
@@ -20,7 +28,7 @@ export function login( data ) {
 export function getInfo( data ) {
   return http.request( {
     method : 'get',
-    url : '/getUserInfo',
+    url : '/v1/oauth/userInfo/',
     data
   } )
 }

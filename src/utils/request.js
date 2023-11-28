@@ -11,10 +11,12 @@ import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { getEnvs } from './envs'
 import cookies from '@/utils/cookies'
-import router from '@/router'
-import { useUserStore } from '@/store'
+// import router from '@/router'
+// import { useUserStore } from '@/store'
 
-import { TOKEN, WHITE_CODE_LIST, LOGIN_ERROR_CODE, GLOBAL_DATA } from '@/config/constant'
+// import { TOKEN, WHITE_CODE_LIST, LOGIN_ERROR_CODE, GLOBAL_DATA } from '@/config/constant'
+import { TOKEN, GLOBAL_DATA } from '@/config/constant'
+
 // import qs from 'qs'
 class HttpRequest {
   // #baseUrl
@@ -129,42 +131,49 @@ class HttpRequest {
     // 响应拦截
     instance.interceptors.response.use(
       res => {
-        const result = res.data
-        const type = Object.prototype.toString.call( result )
+        // const result = res.data
+        return res
+        // const type = Object.prototype.toString.call( result )
 
         // const $config = res.config
 
         // 如果是文件流 直接返回
-        if ( type === '[object Blob]' || type === '[object ArrayBuffer]' ) {
-          return result
-        } else {
-          const { code, message } = result
-          const isErrorToken = LOGIN_ERROR_CODE.find( item => item.code == code )
-          const isWhiteCode = WHITE_CODE_LIST.find( item => item.code == code )
+        // if ( type === '[object Blob]' || type === '[object ArrayBuffer]' ) {
+        //   return result
+        // } else {
+        //   const { code, message } = result
+        //   const isErrorToken = LOGIN_ERROR_CODE.find( item => item.code == code )
+        //   const isWhiteCode = WHITE_CODE_LIST.find( item => item.code == code )
 
-          const userStore = useUserStore()
+        //   const userStore = useUserStore()
 
-          if ( isErrorToken ) {
-            userStore.LOGIN_OUT()
-            router.push( '/login' )
-            window.location.reload()
-          } else if ( !isWhiteCode ) {
-            ElMessage( {
-              message : message || 'Error',
-              type : 'error',
-              duration : 3 * 1000
-            } )
-            return Promise.reject( new Error( message || 'Error' ) )
-          } else {
-            return result
-          }
-        }
+        //   if ( isErrorToken ) {
+        //     userStore.LOGIN_OUT()
+        //     router.push( '/login' )
+        //     window.location.reload()
+        //   } else if ( !isWhiteCode ) {
+        //     ElMessage( {
+        //       message : message || 'Error',
+        //       type : 'error',
+        //       duration : 3 * 1000
+        //     } )
+        //     return Promise.reject( new Error( message || 'Error' ) )
+        //   } else {
+        //     return result
+        //   }
+        // }
 
-        return result
+        // return result
       },
       error => {
         if ( error && error.response ) {
-          error.message = that.checkStatus( error.response.status )
+          console.log( 'error-request', error.response )
+          // 如果error.response.data 有 detail这个key，就是后端返回的错误信息
+          if ( error.response.data && error.response.data.detail ) {
+            error.message = error.response.data.detail
+          } else {
+            error.message = that.checkStatus( error.response.status )
+          }
         }
         const isTimeout = error.message.includes( 'timeout' )
         ElMessage( {
@@ -181,6 +190,7 @@ class HttpRequest {
     const instance = axios.create()
     const baseOpt = this.getConfig()
     const params = Object.assign( {}, baseOpt, this.getParams( options ) )
+    // console.log( 'params=====', params )
     this.setInterceptors( instance )
     return instance( params )
   }

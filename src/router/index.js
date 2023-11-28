@@ -161,48 +161,50 @@ export const asyncRoutes = [
     ]
   },
 
-  {
-    path : '/map',
-    name : 'Map',
-    component : Layout,
-    redirect : '/map/baidu',
-    meta : {
-      title : '地图',
-      icon : 'map'
-    },
-    children : [
-      {
-        path : '/baidu',
-        name : 'BaiDu',
-        component : () => import( '@/views/map/baidu.vue' ),
-        meta : {
-          title : '百度地图',
-          icon : '',
-          noCache : true
-        }
-      },
-      {
-        path : '/gaode',
-        name : 'GaoDe',
-        component : () => import( '@/views/map/gaode.vue' ),
-        meta : {
-          title : '高德地图',
-          icon : '',
-          noCache : true
-        }
-      },
-      {
-        path : '/tencent',
-        name : 'Tencent',
-        component : () => import( '@/views/map/tencent.vue' ),
-        meta : {
-          title : '腾讯地图',
-          icon : '',
-          noCache : true
-        }
-      }
-    ]
-  },
+  // 由后端返回一下路由
+
+  // {
+  //   path : '/map',
+  //   name : 'Map',
+  //   component : Layout,
+  //   redirect : '/map/baidu',
+  //   meta : {
+  //     title : '地图',
+  //     icon : 'map'
+  //   },
+  //   children : [
+  //     {
+  //       path : '/baidu',
+  //       name : 'BaiDu',
+  //       component : () => import( '@/views/map/baidu.vue' ),
+  //       meta : {
+  //         title : '百度地图',
+  //         icon : 'baidu',
+  //         noCache : true
+  //       }
+  //     },
+  //     {
+  //       path : '/gaode',
+  //       name : 'GaoDe',
+  //       component : () => import( '@/views/map/gaode.vue' ),
+  //       meta : {
+  //         title : '高德地图',
+  //         icon : 'gaode',
+  //         noCache : true
+  //       }
+  //     },
+  //     {
+  //       path : '/tencent',
+  //       name : 'Tencent',
+  //       component : () => import( '@/views/map/tencent.vue' ),
+  //       meta : {
+  //         title : '腾讯地图',
+  //         icon : '',
+  //         noCache : true
+  //       }
+  //     }
+  //   ]
+  // },
 
   nested,
 
@@ -275,13 +277,14 @@ export const asyncRoutes = [
     redirect : '/animate/index',
     meta : {
       title : '动画'
+      // roles : ['admin', 'user']
     },
     children : [
       {
         path : 'index',
         component : () => import( '@/views/animate/index.vue' ),
         name : 'Animate',
-        meta : { title : '动画', icon : 'animate', noCache : true }
+        meta : { title : '动画', icon : 'animate', noCache : true, roles : ['admin', 'user'] }
       }
     ]
   },
@@ -303,16 +306,6 @@ export const asyncRoutes = [
         meta : { title : 'VUE3' }
       }
     ]
-  },
-
-  {
-    path : '/:pathMatch(.*)',
-    redirect : '/404',
-    name : 'Redirect404',
-    meta : {
-      title : '404',
-      hidden : true
-    }
   }
 ]
 

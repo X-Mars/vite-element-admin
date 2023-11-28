@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import cookies from '@/utils/cookies'
 import { TOKEN, AVATAR } from '@/config/constant'
-import { logout, getInfo } from '@/api/user'
+import { getInfo } from '@/api/user'
 import { resetRouter } from '@/router'
 import useTagsViewStore from './tagsView'
 
@@ -21,26 +21,25 @@ const useUserStore = defineStore( {
   },
   actions : {
     SET_TOKEN( token = '' ) {
-      token ? cookies.set( TOKEN, token ) : cookies.remove( TOKEN )
-      this.token = token
+      token ? cookies.set( TOKEN, 'Bearer ' + token ) : cookies.remove( TOKEN )
+      this.token = 'Bearer ' + token
     },
     async GET_USER_INFO() {
       try {
-        const { code, data } = await getInfo()
-        if ( code == 200 ) {
-          const { id, name, avatar, roles, phone, email, identity } = data
-          this.uid = id || '9527'
-          this.name = name || ''
-          this.phone = phone || ''
-          this.email = email || ''
-          this.identity = identity || ''
-          this.avatar = avatar || AVATAR
-          this.roles = roles || ['editor']
-          return {
-            ...data,
-            uid : this.uid,
-            roles : this.roles
-          }
+        const { data } = await getInfo()
+        // console.log( 'GET_USER_INFO', data )
+        const { id, name, avatar, roles, phone, email, identity, username } = data
+        this.uid = id || '9527'
+        this.name = name || username || ''
+        this.phone = phone || ''
+        this.email = email || ''
+        this.identity = identity || ''
+        this.avatar = avatar || AVATAR
+        this.roles = roles || ['editor']
+        return {
+          ...data,
+          uid : this.uid,
+          roles : this.roles
         }
       } catch ( error ) {
         return error
@@ -48,17 +47,18 @@ const useUserStore = defineStore( {
     },
     async LOGIN_OUT() {
       try {
-        const { code } = await logout( this.token )
-        if ( code == 200 ) {
-          this.token = ''
-          this.name = ''
-          this.avatar = ''
-          this.phone = ''
-          this.email = ''
-          this.identity = ''
-          this.roles = []
-          this.RESET_INFO()
-        }
+        this.RESET_INFO()
+        // const { code } = await logout( this.token )
+        // if ( code == 200 ) {
+        //   this.token = ''
+        //   this.name = ''
+        //   this.avatar = ''
+        //   this.phone = ''
+        //   this.email = ''
+        //   this.identity = ''
+        //   this.roles = []
+        //   this.RESET_INFO()
+        // }
       } catch ( error ) {
         return error
       }
